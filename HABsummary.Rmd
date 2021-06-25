@@ -1,0 +1,85 @@
+---
+title: "HAB Summary"
+author: "Nick Record"
+date: "6/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+taxon.name <- 'Dinophysis acuta'
+```
+
+## Install and load necessary packages
+
+```{r warning=FALSE, message=FALSE}
+# Install packages
+installed <- rownames(installed.packages())
+if (!("robis" %in% installed)){
+   if (!("remotes" %in% installed))install.packages("remotes")
+   remotes::install_github("iobis/robis")
+}
+if (!("ohwobpg" %in% installed)){
+  remotes::install_github("BigelowLab/ohwobpg", quiet = TRUE)
+}
+
+# Load libraries
+library(robis, quietly = TRUE)
+library(ohwobpg, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+library(biomod2, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(raster, quietly = TRUE)
+library(viridis, quietly = TRUE)
+```
+
+## Fetching occurences
+
+```{r fetch_occurrences}
+taxon.data <- robis::occurrence(taxon.name)
+```
+
+## Plot occurrences
+
+
+
+```{r}
+# Load world map data 
+worldmap <- ggplot2::map_data("world")
+
+# Plot occurrences on world map
+ggplot2::ggplot(data = taxon.data, mapping = aes(x = decimalLongitude, y = decimalLatitude)) +
+  # Add occurrence data
+  geom_point() +
+  # Add map data
+  geom_polygon(data = worldmap, aes(long, lat, group = group), fill = NA, colour = "gray43") +
+        coord_quickmap(xlim = c(round(min(taxon.data$decimalLongitude)), 
+                                round(max(taxon.data$decimalLongitude))), 
+                       ylim = c(round(min(taxon.data$decimalLatitude)), 
+                                round(max(taxon.data$decimalLatitude))),
+                       expand = TRUE) +
+  # Clean up theme
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+## Plot some metadata
+
+```{r}
+hist(as.numeric(taxon.data$year),
+     min(as.numeric(taxon.data$year),na.rm = T):max(as.numeric(taxon.data$year),na.rm = T),
+     ylab = 'Observations',
+     xlab = 'Year',
+     main = '')
+hist(as.numeric(taxon.data$month),12,
+     main = '',
+     xlab = 'Month',
+     ylab = 'Observations')
+hist(taxon.data$sst,100,
+     xlab = 'SST',
+     ylab = 'Observations',
+     main = '')
+```
