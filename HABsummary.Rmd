@@ -50,12 +50,15 @@ taxon.data <- robis::occurrence(taxon.name)
 # Load world map data 
 worldmap <- ggplot2::map_data("world")
 
+haiti <- worldmap %>% dplyr::as_tibble() %>% dplyr::filter(region == "Haiti")
+ 
 # Plot occurrences on world map
 ggplot2::ggplot(data = taxon.data, mapping = aes(x = decimalLongitude, y = decimalLatitude)) +
   # Add occurrence data
-  geom_point() +
+  geom_point() + 
+  geom_polygon(data = worldmap, aes(long, lat, group = group), fill = NA, colour = "grey") + 
   # Add map data
-  geom_polygon(data = worldmap, aes(long, lat, group = group), fill = NA, colour = "gray43") +
+  geom_polygon(data = haiti, aes(long, lat, group = group), fill = NA, colour = "red") +
         coord_quickmap(xlim = c(round(min(taxon.data$decimalLongitude)), 
                                 round(max(taxon.data$decimalLongitude))), 
                        ylim = c(round(min(taxon.data$decimalLatitude)), 
@@ -69,6 +72,9 @@ ggplot2::ggplot(data = taxon.data, mapping = aes(x = decimalLongitude, y = decim
 ## Plot some metadata
 
 ```{r}
+library(ggplot2)
+ggplot()
+
 hist(as.numeric(taxon.data$year),
      min(as.numeric(taxon.data$year),na.rm = T):max(as.numeric(taxon.data$year),na.rm = T),
      ylab = 'Observations',
