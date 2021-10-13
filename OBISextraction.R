@@ -12,14 +12,14 @@ hab.species.only <- hab %>% filter(grepl(' ', ScientificName))
 
 species.list <- hab.species.only$ScientificName
 
-for (j in 1:319) {
+for (j in seq_along(species.list)) {
   taxon.data <- robis::occurrence(as.character(species.list[j]))
 fetch_species(as.character(species.list[j]))
 }
 
 
-fetch_species <- function(species = 'Dinophysis acuta',
-                          path = "~/Documents/data/habobis"/"rawdata"){
+fetch_species <- function(species = 'Alexandrium',
+                          path = "~/Documents/data/habobis/rawdata"){
   taxon.data <- robis::occurrence(species[1])
   taxon.name = gsub(" ","_", tolower(species))
   readr::write_csv(taxon.data, file.path(path[1],paste0(taxon.name,".csv.gz")))

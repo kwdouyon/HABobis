@@ -1,0 +1,85 @@
+---
+title: "Prelimary Graphics"
+author: |
+  | Kenny Douyon, wjdouy23
+  | Formatted using Advanced R Guide
+date: "October 3, 2021"
+output: 
+  html_document:
+    toc:  true
+    toc_float:  true
+    code_folding:  show
+---
+
+## Preliminary examination on five selected (and familiar) HAB species 
+
+***
+***
+
+# Workflow
+
+**Importing Data**: 
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(readr)
+library(ggplot2)
+library(ggmap)
+
+source('~/Documents/GitHub/HABobis/file.R')
+
+```
+
+**Collecting five species**: 
+
+These five species were selected due to relatively prevalence they have in the Gulf of Maine. Thus, it is believed that any results can be interpreted with background knowledge to conclude degree of accuracy. Thus, I will examine the occurrences that fall within the GOM region for each of the following species: 
+
+```{r warning=FALSE, include=TRUE}
+# Target species list
+initial.species <- c('Alexandrium catenella','Karenia brevis', 'Karenia mikimotoi', 'Pseudo-nitzschia seriata', 'Pseudo-nitzschia australis','Dinophysis borealis')
+
+
+taxon.data <- lapply(initial.species, read.occurence) %>% 
+  dplyr::bind_rows()  %>% 
+  dplyr::group_by(scientific_name)
+
+# Looking at global distribution
+worldmap <- ggplot2::map_data("world")
+ 
+# Plot occurrences on world map
+ggplot2::ggplot(data = taxon.data, mapping = aes(x = lon, y = lat, color = scientific_name)) +
+  geom_point(alpha = .25) + 
+  geom_polygon(data = worldmap, aes(long, lat, group = group), fill = NA, colour = "grey") +
+  coord_quickmap(xlim = round(range(taxon.data$lon)), 
+                       ylim = round(range(taxon.data$lat)),
+                       expand = FALSE) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        legend.position = "none") +
+  facet_wrap(~scientific_name)
+```
+
+
+**Plotting Data**: 
+
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+#a
+top.3hab <- head(obs.data[order(obs.data$Observations,decreasing = TRUE),], 3)
+
+ggplot(data = taxon.data, aes(x = scientific_name, y = sst)) +
+  geom_boxplot() +
+  #geom_text(aes(label= Observations), vjust=.5, color="black", size=2, hjust = -0.1, fontfanily = "Times")
+  
+  labs(title = "Distribution of Top 15 Recorded HAB Species",
+       y = "Observation Count",
+       x = "Species",
+       caption = "Source: OBIS") +
+  coord_flip() +
+  theme(text = element_text(family = "Times"),
+        plot.title = element_text(face = "bold", size = 15),
+        axis.text = element_text(size = 10)) 
+
+
+
+```
